@@ -356,13 +356,15 @@
   </div>
 </div>
 
-</div>
-@endsection
-
 <script>
-    document.getElementById('lightboxModal').addEventListener('show.bs.modal', function(e) {
-        const img = e.relatedTarget;
-        document.getElementById('lightbox-img').src = img.dataset.img;
+    document.addEventListener('DOMContentLoaded', function() {
+        var modalEl = document.getElementById('lightboxModal');
+        if(modalEl) {
+            modalEl.addEventListener('show.bs.modal', function(e) {
+                const img = e.relatedTarget;
+                document.getElementById('lightbox-img').src = img.dataset.img;
+            });
+        }
     });
 </script>
 @endsection

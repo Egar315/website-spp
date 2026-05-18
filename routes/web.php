@@ -21,7 +21,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/admin/users/{user}', [AdminController::class, 'updateUser'])->name('admin.users.update');
     Route::delete('/admin/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
     Route::get('/admin/students', [AdminController::class, 'students'])->name('admin.students');
+    Route::post('/admin/students', [AdminController::class, 'storeStudent']);
     Route::put('/admin/students/{student}', [AdminController::class, 'updateStudent'])->name('admin.students.update');
+    Route::delete('/admin/students/{student}', [AdminController::class, 'deleteStudent'])->name('admin.students.delete');
     Route::get('/admin/payments', [AdminController::class, 'payments'])->name('admin.payments');
     Route::get('/admin/settings', [AdminController::class, 'settings'])->name('admin.settings');
     Route::post('/admin/settings', [AdminController::class, 'saveSettings']);

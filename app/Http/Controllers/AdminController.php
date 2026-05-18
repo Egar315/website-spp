@@ -189,19 +189,75 @@ class AdminController extends Controller
     }
 
     /**
-     * Update student details (like class).
+     * Store a new student.
      */
-    public function updateStudent(Request $request, \App\Models\Student $student)
+    public function storeStudent(Request $request)
     {
         $validated = $request->validate([
+            'nisn' => 'required|string|max:255|unique:students,nisn',
+            'name' => 'required|string|max:255',
             'class_name' => 'required|string|max:255',
             'academic_year' => 'required|string|max:255',
             'payment_status' => 'required|in:paid,unpaid',
         ]);
 
+        \App\Models\Student::create($validated);
+
+        // Auto-create user for login if doesn't exist
+        if (!\App\Models\User::where('username', $validated['nisn'])->exists()) {
+            \App\Models\User::create([
+                'name' => $validated['name'],
+                'username' => $validated['nisn'],
+                'email' => $validated['nisn'] . '@student.com',
+                'password' => bcrypt('password123'), // Default password
+                'role' => 'siswa',
+                'status' => 'active',
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Data siswa '.$validated['name'].' berhasil ditambahkan!');
+    }
+
+    /**
+     * Update student details (like class).
+     */
+    public function updateStudent(Request $request, \App\Models\Student $student)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'nisn' => 'required|string|max:255|unique:students,nisn,' . $student->id,
+            'class_name' => 'required|string|max:255',
+            'academic_year' => 'required|string|max:255',
+            'payment_status' => 'required|in:paid,unpaid',
+        ]);
+
+        // Update corresponding user if nisn/name changed
+        if ($student->nisn !== $validated['nisn'] || $student->name !== $validated['name']) {
+            $user = \App\Models\User::where('username', $student->nisn)->where('role', 'siswa')->first();
+            if ($user) {
+                $user->username = $validated['nisn'];
+                $user->name = $validated['name'];
+                $user->save();
+            }
+        }
+
         $student->update($validated);
 
         return redirect()->back()->with('success', 'Data siswa '.$student->name.' berhasil diperbarui!');
+    }
+
+    /**
+     * Delete student.
+     */
+    public function deleteStudent(\App\Models\Student $student)
+    {
+        $name = $student->name;
+        
+        // Also delete associated user
+        \App\Models\User::where('username', $student->nisn)->where('role', 'siswa')->delete();
+        
+        $student->delete();
+        return redirect()->back()->with('success', 'Data siswa '.$name.' berhasil dihapus!');
     }
 
     /**

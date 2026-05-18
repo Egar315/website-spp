@@ -195,6 +195,12 @@
     }
     .btn-edit { background-color: #eff6ff; color: #2563eb; }
     .btn-edit:hover { background-color: #2563eb; color: white; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
+    
+    .btn-delete { background-color: #fef2f2; color: #dc2626; }
+    .btn-delete:hover { background-color: #dc2626; color: white; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2); }
+
+    .btn-add { background-color: #1e3a8a; color: white; border-radius: 8px; font-weight: 600; padding: 8px 16px; border: none; transition: all 0.2s; }
+    .btn-add:hover { background-color: #172554; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2); }
 
     .modal-content {
         border-radius: 20px !important;
@@ -215,7 +221,12 @@
 </style>
 
 <div>
-    <h2 class="page-title">Data Induk Siswa</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="page-title mb-0">Data Induk Siswa</h2>
+        <button type="button" class="btn-add" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+            <i class="bi bi-plus-lg me-1"></i> Tambah Siswa
+        </button>
+    </div>
 
     <div class="main-card">
         
@@ -270,16 +281,26 @@
                             @endif
                         </td>
                         <td>
-                            <button type="button" class="action-btn btn-edit" 
-                                data-bs-toggle="modal" 
-                                data-bs-target="#editStudentModal"
-                                data-id="{{ $student->id }}"
-                                data-name="{{ $student->name }}"
-                                data-class="{{ $student->class_name }}"
-                                data-year="{{ $student->academic_year }}"
-                                data-status="{{ $student->payment_status }}">
-                                <i class="bi bi-pencil-square"></i> Edit
-                            </button>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="action-btn btn-edit" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#editStudentModal"
+                                    data-id="{{ $student->id }}"
+                                    data-nisn="{{ $student->nisn }}"
+                                    data-name="{{ $student->name }}"
+                                    data-class="{{ $student->class_name }}"
+                                    data-year="{{ $student->academic_year }}"
+                                    data-status="{{ $student->payment_status }}">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </button>
+                                <form action="{{ route('admin.students.delete', $student->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data siswa ini? Ini juga akan menghapus akun login siswa tersebut.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="action-btn btn-delete">
+                                        <i class="bi bi-trash"></i> Hapus
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     @empty
@@ -317,8 +338,12 @@
           @method('PUT')
           <div class="modal-body px-4">
             <div class="mb-3">
+                <label class="form-label text-muted" style="font-size: 0.75rem; font-weight: 700;">NISN</label>
+                <input type="text" name="nisn" id="edit_nisn" class="form-control" style="border-radius: 10px; padding: 10px 16px; border: 1px solid #e2e8f0; background-color: #f8fafc;" required>
+            </div>
+            <div class="mb-3">
                 <label class="form-label text-muted" style="font-size: 0.75rem; font-weight: 700;">NAMA SISWA</label>
-                <input type="text" id="edit_name" class="form-control" readonly style="background-color: #e2e8f0; border:none; border-radius: 10px; padding: 10px 16px;">
+                <input type="text" name="name" id="edit_name" class="form-control" style="border-radius: 10px; padding: 10px 16px; border: 1px solid #e2e8f0; background-color: #f8fafc;" required>
             </div>
             
             <div class="mb-3">
@@ -362,6 +387,69 @@
     </div>
   </div>
 </div>
+
+<!-- Add Student Modal -->
+<div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0 pt-4 px-4">
+        <h5 class="modal-title fw-bold" id="addStudentModalLabel">Tambah Data Siswa</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ route('admin.students') }}" method="POST">
+          @csrf
+          <div class="modal-body px-4">
+            <div class="mb-3">
+                <label class="form-label text-muted" style="font-size: 0.75rem; font-weight: 700;">NISN</label>
+                <input type="text" name="nisn" class="form-control" style="border-radius: 10px; padding: 10px 16px; border: 1px solid #e2e8f0; background-color: #f8fafc;" required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label text-muted" style="font-size: 0.75rem; font-weight: 700;">NAMA SISWA</label>
+                <input type="text" name="name" class="form-control" style="border-radius: 10px; padding: 10px 16px; border: 1px solid #e2e8f0; background-color: #f8fafc;" required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label text-muted" style="font-size: 0.75rem; font-weight: 700;">KELAS</label>
+                <select name="class_name" class="form-select" style="border-radius: 10px; padding: 10px 16px; border: 1px solid #e2e8f0; background-color: #f8fafc;" required>
+                    <option value="Belum Ditentukan">Belum Ditentukan</option>
+                    <option value="X RPL">X RPL</option>
+                    <option value="X TKJ">X TKJ</option>
+                    <option value="X MM">X MM</option>
+                    <option value="XI RPL">XI RPL</option>
+                    <option value="XI TKJ">XI TKJ</option>
+                    <option value="XI MM">XI MM</option>
+                    <option value="XII RPL">XII RPL</option>
+                    <option value="XII TKJ">XII TKJ</option>
+                    <option value="XII MM">XII MM</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-muted" style="font-size: 0.75rem; font-weight: 700;">TAHUN AJARAN</label>
+                <select name="academic_year" class="form-select" style="border-radius: 10px; padding: 10px 16px; border: 1px solid #e2e8f0; background-color: #f8fafc;" required>
+                    <option value="2026/2027">2026/2027</option>
+                    <option value="2025/2026">2025/2026</option>
+                    <option value="2024/2025">2024/2025</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label text-muted" style="font-size: 0.75rem; font-weight: 700;">STATUS PEMBAYARAN AWAL</label>
+                <select name="payment_status" class="form-select" style="border-radius: 10px; padding: 10px 16px; border: 1px solid #e2e8f0; background-color: #f8fafc;" required>
+                    <option value="unpaid">Belum Lunas</option>
+                    <option value="paid">Lunas</option>
+                </select>
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0 pb-4 px-4">
+            <button type="button" class="btn btn-light" style="border-radius: 8px; font-weight: 600;" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary" style="background-color: #1e3a8a; border-radius: 8px; font-weight: 600; border: none;">Tambah Siswa</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
 @endsection
 
 <script>
@@ -371,11 +459,13 @@
             editStudentModal.addEventListener('show.bs.modal', function (event) {
                 var button = event.relatedTarget;
                 var id = button.getAttribute('data-id');
+                var nisn = button.getAttribute('data-nisn');
                 var name = button.getAttribute('data-name');
                 var className = button.getAttribute('data-class');
                 var year = button.getAttribute('data-year');
                 var status = button.getAttribute('data-status');
                 
+                document.getElementById('edit_nisn').value = nisn;
                 document.getElementById('edit_name').value = name;
                 
                 // Set the correct option, or keep it if it exists
